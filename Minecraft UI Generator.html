@@ -167,8 +167,15 @@
     <div id="colorPalette" class="color-palette"></div>
     <h2>Format Codes</h2>
     <div id="formatCodes" class="format-codes"></div>
-    <h2>Symbols</h2>
-    <div id="symbols" class="symbols"></div>
+<h2>Symbols</h2>
+<div id="symbols">
+    <h3>Basic</h3>
+    <div id="basicSymbols" class="symbols symbol-category"></div>
+    <h3>Controls</h3>
+    <div id="controlsSymbols" class="symbols symbol-category"></div>
+    <h3>Effect</h3>
+    <div id="effectSymbols" class="symbols symbol-category"></div>
+</div>
 
     <script>
         let buttonCount = 0;
@@ -186,13 +193,95 @@
             '§o': 'Italic',
             '§r': 'Reset'
         };
-        const symbols = {
-            'Food': '‹', 'Armor': '›', 'Heart': '❤', 'Wooden Pickaxe': '–',
-            'Wooden Sword': '†', 'Crafting Table': '✗', 'Furnace': '✓',
-            'Minecoin': '▶', 'Token': 'ᚬ', 'Craft Toggle On': '⌃',
-            'Craft Toggle Off': '⌄', 'Crosshair': '›', 'Agent': '‖',
-            'Immersive Reader': '✎', 'Hollow Star': '✯', 'Solid Star': '☆'
-        };
+        
+<script>
+    let buttonCount = 0;
+    const colorCodes = {
+        '§0': '000000', '§1': '0000AA', '§2': '00AA00', '§3': '00AAAA',
+        '§4': 'AA0000', '§5': 'AA00AA', '§6': 'FFAA00', '§7': 'AAAAAA',
+        '§8': '555555', '§9': '5555FF', '§a': '55FF55', '§b': '55FFFF',
+        '§c': 'FF5555', '§d': 'FF55FF', '§e': 'FFFF55', '§f': 'FFFFFF'
+    };
+    const formatCodes = {
+        '§k': 'Obfuscated',
+        '§l': 'Bold',
+        '§m': 'Strikethrough',
+        '§n': 'Underline',
+        '§o': 'Italic',
+        '§r': 'Reset',
+        '\\n': 'New Line'
+    };
+    const Symbol = {
+        basic: {
+            wifiOn: '\ue100',
+            wifiOff: '\ue101',
+            controller: '\ue102',
+            touch: '\ue103',
+            mouse: '\ue104',
+            vr: '\ue105',
+            minecoinGold: '\ue120',
+            experienceOrb: '\ue13a',
+            food: '\ue13b',
+            armor: '\ue13c',
+            minecart: '\ue13d',
+            boat: '\ue13e',
+            bucketLava: '\ue13f',
+            bucketWater: '\ue140',
+            bucketMilk: '\ue141',
+            bucketPowderSnow: '\ue142',
+            dye: '\ue143',
+            amulet: '\ue144'
+        },
+        controls: {
+            arrowLeft: '\ue106',
+            arrowRight: '\ue107',
+            arrowUp: '\ue108',
+            arrowDown: '\ue109',
+            leftClick: '\ue110',
+            rightClick: '\ue111',
+            middleClick: '\ue112',
+            jump: '\ue113',
+            crouch: '\ue114',
+            fly: '\ue115',
+            sprint: '\ue116',
+            swim: '\ue117',
+            enter: '\ue118',
+            drop: '\ue119',
+            chat: '\ue11a',
+            craftingSlot: '\ue11b',
+            craftingTableSlot: '\ue11c',
+            furnaceSlot: '\ue11d',
+            breedingSlot: '\ue11e',
+            chestSlot: '\ue11f'
+        },
+        effect: {
+            mobEffectHealthBoost: '\ue121',
+            mobEffectAbsorption: '\ue122',
+            mobEffectResistance: '\ue123',
+            mobEffectRegeneration: '\ue124',
+            mobEffectLuck: '\ue125',
+            mobEffectUnluck: '\ue126',
+            mobEffectStrength: '\ue127',
+            mobEffectWeakness: '\ue128',
+            mobEffectPoison: '\ue129',
+            mobEffectNausea: '\ue12a',
+            mobEffectHunger: '\ue12b',
+            mobEffectSaturation: '\ue12c',
+            mobEffectLevitation: '\ue12d',
+            mobEffectFatigue: '\ue12e',
+            mobEffectHaste: '\ue12f',
+            mobEffectMiningFatigue: '\ue130',
+            mobEffectSlowFalling: '\ue131',
+            mobEffectConduitPower: '\ue132',
+            mobEffectBlindness: '\ue133',
+            mobEffectNightVision: '\ue134',
+            mobEffectInvisibility: '\ue135',
+            mobEffectFireResistance: '\ue136',
+            mobEffectWaterBreathing: '\ue137',
+            mobEffectBadOmen: '\ue138',
+            mobEffectVillageHero: '\ue139'
+        }
+    };
 
         function addButton() {
             const buttonInputs = document.getElementById('buttonInputs');
@@ -225,28 +314,28 @@
         }
 
         function updatePreview() {
-            const title = document.getElementById('titleInput').value;
-            const body = document.getElementById('bodyInput').value;
-            let buttonsHtml = '';
+        const title = document.getElementById('titleInput').value;
+        const body = document.getElementById('bodyInput').value;
+        let buttonsHtml = '';
 
-            document.getElementById('previewTitle').innerHTML = applyFormatting(title);
-            document.getElementById('previewBody').innerHTML = applyFormatting(body);
+        document.getElementById('previewTitle').innerHTML = applyFormatting(title);
+        document.getElementById('previewBody').innerHTML = applyFormatting(body).replace(/\\n/g, '<br>');
 
-            const buttonInputs = document.querySelectorAll('.button-input');
-            buttonInputs.forEach((input, index) => {
-                const buttonIcon = input.querySelector(`input[id^="buttonIcon"]`).value;
-                const buttonText = input.querySelector(`input[id^="buttonText"]`).value;
-                if (buttonText || buttonIcon) {
-                    buttonsHtml += `
-                        <div class="preview-button">
-                            ${buttonIcon ? `<div class="preview-button-icon">${buttonIcon}</div>` : ''}
-                            <span class="preview-button-text">${applyFormatting(buttonText)}</span>
-                        </div>`;
-                }
-            });
+        const buttonInputs = document.querySelectorAll('.button-input');
+        buttonInputs.forEach((input, index) => {
+            const buttonIcon = input.querySelector(`input[id^="buttonIcon"]`).value;
+            const buttonText = input.querySelector(`input[id^="buttonText"]`).value;
+            if (buttonText || buttonIcon) {
+                buttonsHtml += `
+                    <div class="preview-button">
+                        ${buttonIcon ? `<div class="preview-button-icon">${buttonIcon}</div>` : ''}
+                        <span class="preview-button-text">${applyFormatting(buttonText)}</span>
+                    </div>`;
+            }
+        });
 
-            document.getElementById('previewButtons').innerHTML = buttonsHtml;
-        }
+        document.getElementById('previewButtons').innerHTML = buttonsHtml;
+    }
 
         function applyFormatting(text) {
             let result = '';
@@ -326,42 +415,44 @@ ${buttonsCode}`;
         }
 
         function createFormatCodes() {
-            const formatSection = document.getElementById('formatCodes');
-            for (const [code, description] of Object.entries(formatCodes)) {
-                const button = document.createElement('div');
-                button.className = 'format-button';
-                button.textContent = `${code} ${description}`;
-                button.onclick = () => {
-                    navigator.clipboard.writeText(code).then(() => {
-                        alert(`Copied ${code} to clipboard!`);
-                    });
-                };
-                formatSection.appendChild(button);
-            }
+        const formatSection = document.getElementById('formatCodes');
+        for (const [code, description] of Object.entries(formatCodes)) {
+            const button = document.createElement('div');
+            button.className = 'format-button';
+            button.textContent = `${code} ${description}`;
+            button.onclick = () => {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert(`Copied ${code} to clipboard!`);
+                });
+            };
+            formatSection.appendChild(button);
         }
+    }
 
-        function createSymbols() {
-            const symbolsSection = document.getElementById('symbols');
+    function createSymbols() {
+        for (const [category, symbols] of Object.entries(Symbol)) {
+            const categoryDiv = document.getElementById(`${category}Symbols`);
             for (const [name, symbol] of Object.entries(symbols)) {
                 const button = document.createElement('div');
                 button.className = 'symbol-button';
-                button.textContent = `${name}: ${symbol}`;
+                button.innerHTML = `<span class="symbol-name">${name}</span><span class="symbol-char">${symbol}</span>`;
                 button.onclick = () => {
-                    navigator.clipboard.writeText(symbol).then(() => {
-                        alert(`Copied ${symbol} to clipboard!`);
+                    navigator.clipboard.writeText(symbol.codePointAt(0).toString(16)).then(() => {
+                        alert(`Copied \\u${symbol.codePointAt(0).toString(16)} to clipboard!`);
                     });
                 };
-                symbolsSection.appendChild(button);
+                categoryDiv.appendChild(button);
             }
         }
+    }
 
-        // Initialize the UI
-        updateAddButtonVisibility();
-        document.getElementById('titleInput').addEventListener('input', updatePreview);
-        document.getElementById('bodyInput').addEventListener('input', updatePreview);
-        createColorPalette();
-        createFormatCodes();
-        createSymbols();
-    </script>
+    // Initialize the UI
+    updateAddButtonVisibility();
+    document.getElementById('titleInput').addEventListener('input', updatePreview);
+    document.getElementById('bodyInput').addEventListener('input', updatePreview);
+    createColorPalette();
+    createFormatCodes();
+    createSymbols();
+</script>
 </body>
 </html>
