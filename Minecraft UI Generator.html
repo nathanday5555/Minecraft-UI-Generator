@@ -377,44 +377,170 @@
         }
 
         function generateCode() {
-            const title = document.getElementById('titleInput').value;
-            const body = document.getElementById('bodyInput').value;
-            let buttonsCode = '';
+<script>
+    let buttonCount = 0;
+    const colorCodes = {
+        '§0': '000000', '§1': '0000AA', '§2': '00AA00', '§3': '00AAAA',
+        '§4': 'AA0000', '§5': 'AA00AA', '§6': 'FFAA00', '§7': 'AAAAAA',
+        '§8': '555555', '§9': '5555FF', '§a': '55FF55', '§b': '55FFFF',
+        '§c': 'FF5555', '§d': 'FF55FF', '§e': 'FFFF55', '§f': 'FFFFFF'
+    };
+    const formatCodes = {
+        '§k': 'Obfuscated',
+        '§l': 'Bold',
+        '§m': 'Strikethrough',
+        '§n': 'Underline',
+        '§o': 'Italic',
+        '§r': 'Reset',
+        '\\n': 'New Line'
+    };
+    const Symbol = {
+        basic: {
+            wifiOn: '\ue100'
+            // Add more basic symbols here
+        },
+        controls: {
+            arrowLeft: '\ue106'
+            // Add more control symbols here
+        },
+        effect: {
+            mobEffectHealthBoost: '\ue121'
+            // Add more effect symbols here
+        }
+    };
 
-            const buttonInputs = document.querySelectorAll('.button-input');
-            buttonInputs.forEach((input, index) => {
-                const buttonIcon = input.querySelector(`input[id^="buttonIcon"]`).value;
-                const buttonText = input.querySelector(`input[id^="buttonText"]`).value;
-                if (buttonText || buttonIcon) {
-                    buttonsCode += `button("${buttonText}", "${buttonIcon}");\n`;
+    function addButton() {
+        const buttonInputs = document.getElementById('buttonInputs');
+        const newButtonInput = document.createElement('div');
+        newButtonInput.className = 'button-input';
+        newButtonInput.innerHTML = `
+            <input type="text" id="buttonIcon${buttonCount}" placeholder="Icon" oninput="updatePreview()">
+            <input type="text" id="buttonText${buttonCount}" placeholder="Button Text" oninput="updatePreview()">
+            <div class="icon-buttons">
+                <button class="icon-button" onclick="addButton()">+</button>
+                <button class="icon-button" onclick="removeButton(this)">×</button>
+            </div>
+        `;
+        buttonInputs.appendChild(newButtonInput);
+        buttonCount++;
+        updateAddButtonVisibility();
+        updatePreview();
+    }
+
+    function removeButton(button) {
+        button.closest('.button-input').remove();
+        buttonCount--;
+        updateAddButtonVisibility();
+        updatePreview();
+    }
+
+    function updateAddButtonVisibility() {
+        const addButtonBtn = document.getElementById('addButtonBtn');
+        addButtonBtn.style.display = buttonCount === 0 ? 'block' : 'none';
+    }
+
+    function updatePreview() {
+        const title = document.getElementById('titleInput').value;
+        const body = document.getElementById('bodyInput').value;
+        let buttonsHtml = '';
+
+        document.getElementById('previewTitle').innerHTML = applyFormatting(title);
+        document.getElementById('previewBody').innerHTML = applyFormatting(body).replace(/\\n/g, '<br>');
+
+        const buttonInputs = document.querySelectorAll('.button-input');
+        buttonInputs.forEach((input, index) => {
+            const buttonIcon = input.querySelector(`input[id^="buttonIcon"]`).value;
+            const buttonText = input.querySelector(`input[id^="buttonText"]`).value;
+            if (buttonText || buttonIcon) {
+                buttonsHtml += `
+                    <div class="preview-button">
+                        ${buttonIcon ? `<div class="preview-button-icon">${buttonIcon}</div>` : ''}
+                        <span class="preview-button-text">${applyFormatting(buttonText)}</span>
+                    </div>`;
+            }
+        });
+
+        document.getElementById('previewButtons').innerHTML = buttonsHtml;
+    }
+
+    function applyFormatting(text) {
+        let result = '';
+        let currentColor = '';
+        let currentFormat = '';
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === '§' && i + 1 < text.length) {
+                const code = '§' + text[i + 1];
+                if (colorCodes[code]) {
+                    currentColor = code;
+                    currentFormat = '';
+                } else if (formatCodes[code]) {
+                    if (code === '§r') {
+                        currentColor = '';
+                        currentFormat = '';
+                    } else {
+                        currentFormat += code;
+                    }
                 }
-            });
+                i++; // Skip the next character
+            } else {
+                let style = '';
+                if (currentColor && colorCodes[currentColor]) {
+                    style += `color: #${colorCodes[currentColor]};`;
+                }
+                if (currentFormat.includes('§l')) style += 'font-weight: bold;';
+                if (currentFormat.includes('§m')) style += 'text-decoration: line-through;';
+                if (currentFormat.includes('§n')) style += 'text-decoration: underline;';
+                if (currentFormat.includes('§o')) style += 'font-style: italic;';
+                
+                if (style) {
+                    result += `<span style="${style}">${text[i]}</span>`;
+                } else {
+                    result += text[i];
+                }
+            }
+        }
+        return result;
+    }
 
-            const generatedCode = `
+    function generateCode() {
+        const title = document.getElementById('titleInput').value;
+        const body = document.getElementById('bodyInput').value;
+        let buttonsCode = '';
+
+        const buttonInputs = document.querySelectorAll('.button-input');
+        buttonInputs.forEach((input, index) => {
+            const buttonIcon = input.querySelector(`input[id^="buttonIcon"]`).value;
+            const buttonText = input.querySelector(`input[id^="buttonText"]`).value;
+            if (buttonText || buttonIcon) {
+                buttonsCode += `button("${buttonText}", "${buttonIcon}");\n`;
+            }
+        });
+
+        const generatedCode = `
 title("${title}");
 body("${body}");
 ${buttonsCode}`;
 
-            document.getElementById('generatedCode').textContent = generatedCode;
-        }
+        document.getElementById('generatedCode').textContent = generatedCode;
+    }
 
-        function createColorPalette() {
-            const palette = document.getElementById('colorPalette');
-            for (const [code, color] of Object.entries(colorCodes)) {
-                const button = document.createElement('div');
-                button.className = 'color-button';
-                button.style.backgroundColor = `#${color}`;
-                button.textContent = code;
-                button.onclick = () => {
-                    navigator.clipboard.writeText(code).then(() => {
-                        alert(`Copied ${code} to clipboard!`);
-                    });
-                };
-                palette.appendChild(button);
-            }
+    function createColorPalette() {
+        const palette = document.getElementById('colorPalette');
+        for (const [code, color] of Object.entries(colorCodes)) {
+            const button = document.createElement('div');
+            button.className = 'color-button';
+            button.style.backgroundColor = `#${color}`;
+            button.textContent = code;
+            button.onclick = () => {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert(`Copied ${code} to clipboard!`);
+                });
+            };
+            palette.appendChild(button);
         }
+    }
 
-        function createFormatCodes() {
+    function createFormatCodes() {
         const formatSection = document.getElementById('formatCodes');
         for (const [code, description] of Object.entries(formatCodes)) {
             const button = document.createElement('div');
@@ -437,7 +563,7 @@ ${buttonsCode}`;
                 button.className = 'symbol-button';
                 button.innerHTML = `<span class="symbol-name">${name}</span><span class="symbol-char">${symbol}</span>`;
                 button.onclick = () => {
-                    navigator.clipboard.writeText(symbol.codePointAt(0).toString(16)).then(() => {
+                    navigator.clipboard.writeText('\\u' + symbol.codePointAt(0).toString(16)).then(() => {
                         alert(`Copied \\u${symbol.codePointAt(0).toString(16)} to clipboard!`);
                     });
                 };
